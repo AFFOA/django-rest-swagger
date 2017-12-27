@@ -5,7 +5,17 @@ from importlib import import_module
 from django.conf import settings
 from django.utils import six
 from django.utils.six.moves.urllib_parse import urljoin
-from django.core.urlresolvers import RegexURLResolver, RegexURLPattern
+try:
+    from django.urls import (
+        URLPattern,
+        URLResolver,
+    )
+except ImportError:
+    from django.urls import (
+        RegexURLPattern as URLPattern,
+        RegexURLResolver as URLResolver,
+    )
+
 from django.contrib.admindocs.views import simplify_regex
 
 from rest_framework.views import APIView
@@ -150,7 +160,7 @@ class UrlParser(object):
         pattern_list = []
 
         for pattern in patterns:
-            if isinstance(pattern, RegexURLPattern):
+            if isinstance(pattern, URLPattern):
                 endpoint_data = self.__assemble_endpoint_data__(
                     pattern, prefix, filter_path=filter_path)
 
@@ -159,7 +169,7 @@ class UrlParser(object):
 
                 pattern_list.append(endpoint_data)
 
-            elif isinstance(pattern, RegexURLResolver):
+            elif isinstance(pattern, URLResolver):
 
                 if pattern.namespace is not None \
                         and pattern.namespace in exclude_namespaces:
