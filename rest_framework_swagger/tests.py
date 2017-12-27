@@ -7,11 +7,11 @@ try:
     from unittest.case import SkipTest
 except ImportError:
     from unittest2.case import SkipTest
-
-from django.urls import (
-    URLPattern,
-    URLResolver,
-)
+try:
+    from django.urls import (
+        URLPattern,
+        URLResolver,
+    )
 except ImportError:
     from django.urls import (
         RegexURLPattern as URLPattern,
