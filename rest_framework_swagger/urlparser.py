@@ -5,13 +5,24 @@ from importlib import import_module
 from django.conf import settings
 from django.utils import six
 from django.utils.six.moves.urllib_parse import urljoin
-from django.core.urlresolvers import RegexURLResolver, RegexURLPattern
+try:
+    from django.urls import (
+        URLPattern,
+        URLResolver,
+    )
+except ImportError:
+    from django.urls import (
+        RegexURLPattern as URLPattern,
+        RegexURLResolver as URLResolver,
+    )
+
 from django.contrib.admindocs.views import simplify_regex
 
 from rest_framework.views import APIView
 
 from .apidocview import APIDocView
 from . import SWAGGER_SETTINGS
+from rest_framework_swagger.compat import get_regex_pattern
 
 
 class UrlParser(object):
@@ -119,7 +130,7 @@ class UrlParser(object):
         if callback is None or self.__exclude_router_api_root__(callback):
             return
 
-        path = simplify_regex(prefix + pattern.regex.pattern)
+        path = simplify_regex(prefix + get_regex_pattern(pattern))
 
         if filter_path is not None:
             if re.match('^/?%s(/.*)?$' % re.escape(filter_path), path) is None:
@@ -150,7 +161,7 @@ class UrlParser(object):
         pattern_list = []
 
         for pattern in patterns:
-            if isinstance(pattern, RegexURLPattern):
+            if isinstance(pattern, URLPattern):
                 endpoint_data = self.__assemble_endpoint_data__(
                     pattern, prefix, filter_path=filter_path)
 
@@ -159,13 +170,13 @@ class UrlParser(object):
 
                 pattern_list.append(endpoint_data)
 
-            elif isinstance(pattern, RegexURLResolver):
+            elif isinstance(pattern, URLResolver):
 
                 if pattern.namespace is not None \
                         and pattern.namespace in exclude_namespaces:
                     continue
 
-                pref = prefix + pattern.regex.pattern
+                pref = prefix + get_regex_pattern(pattern)
                 pattern_list.extend(self.__flatten_patterns_tree__(
                     pattern.url_patterns,
                     pref,
