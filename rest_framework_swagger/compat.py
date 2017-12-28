@@ -59,20 +59,6 @@ def get_regex_pattern(urlpattern):
         # Django < 2.0
         return urlpattern.regex.pattern
 
-def make_url_resolver(regex, urlpatterns):
-    """
-    Added to support changes to Regex generation
-    """
-    try:
-        # Django 2.0
-        from django.urls.resolvers import RegexPattern
-        return URLResolver(RegexPattern(regex), urlpatterns)
-
-    except ImportError:
-        # Django < 2.0
-        return URLResolver(regex, urlpatterns)
-
-
 def strip_tags(html):
     s = MLStripper()
     s.feed(html)
