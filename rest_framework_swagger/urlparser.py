@@ -22,6 +22,7 @@ from rest_framework.views import APIView
 
 from .apidocview import APIDocView
 from . import SWAGGER_SETTINGS
+from rest_framework_swagger.compat import get_regex_pattern
 
 
 class UrlParser(object):
@@ -129,7 +130,7 @@ class UrlParser(object):
         if callback is None or self.__exclude_router_api_root__(callback):
             return
 
-        path = simplify_regex(prefix + pattern.regex.pattern)
+        path = simplify_regex(prefix + get_regex_pattern(pattern))
 
         if filter_path is not None:
             if re.match('^/?%s(/.*)?$' % re.escape(filter_path), path) is None:
@@ -175,7 +176,7 @@ class UrlParser(object):
                         and pattern.namespace in exclude_namespaces:
                     continue
 
-                pref = prefix + pattern.regex.pattern
+                pref = prefix + get_regex_pattern(pattern)
                 pattern_list.extend(self.__flatten_patterns_tree__(
                     pattern.url_patterns,
                     pref,

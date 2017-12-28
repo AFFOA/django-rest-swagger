@@ -37,6 +37,41 @@ else:
         def get_data(self):
             return ''.join(self.fed) + self.rawdata
 
+try:
+    from django.urls import (
+        URLPattern,
+        URLResolver,
+    )
+except ImportError:
+    from django.urls import (
+        RegexURLPattern as URLPattern,
+        RegexURLResolver as URLResolver,
+    )
+
+def get_regex_pattern(urlpattern):
+    """
+    Added to support changes to Django 2.0 urlpattern regex access.
+    """
+    if hasattr(urlpattern, 'pattern'):
+        # Django 2.0
+        return urlpattern.pattern.regex.pattern
+    else:
+        # Django < 2.0
+        return urlpattern.regex.pattern
+
+def make_url_resolver(regex, urlpatterns):
+    """
+    Added to support changes to Regex generation
+    """
+    try:
+        # Django 2.0
+        from django.urls.resolvers import RegexPattern
+        return URLResolver(RegexPattern(regex), urlpatterns)
+
+    except ImportError:
+        # Django < 2.0
+        return URLResolver(regex, urlpatterns)
+
 
 def strip_tags(html):
     s = MLStripper()
